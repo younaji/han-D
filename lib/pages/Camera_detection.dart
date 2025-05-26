@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:hand_app/widgets/Logobar.dart';
 
 class CameraDetectionPage extends StatefulWidget {
   const CameraDetectionPage({super.key});
@@ -66,11 +67,9 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
     final screenSize = MediaQuery.of(context).size;
 
     return Scaffold(
+      appBar: Logobar(),
       body: Column(
         children: [
-          SizedBox(height: screenSize.height * 0.1),
-
-          // 제목
           const Text(
             'DAY 1',
             textAlign: TextAlign.center,
@@ -81,9 +80,6 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
               color: Color(0xFF302E2E),
             ),
           ),
-
-          SizedBox(height: screenSize.height * 0.05),
-
           Expanded(
             child: _hasCamera
                 ? (_isCameraInitialized
@@ -91,18 +87,29 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
                         alignment: Alignment.center,
                         children: [
                           Container(
-                            width: double.infinity,
-                            height: double.infinity,
-                            color: const Color(0xFFB39DDB),
+                            width: screenSize.width * 0.89,
+                            height: screenSize.height * 0.6,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              color: const Color(0x80DC89D1),
+                            ),
                           ),
-                          AspectRatio(
-                            aspectRatio: _cameraController!.value.aspectRatio,
-                            child: CameraPreview(_cameraController!),
+                          Container(
+                            width: screenSize.width * 0.8,
+                            height: screenSize.height * 0.44,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: AspectRatio(
+                              aspectRatio: _cameraController!.value.aspectRatio,
+                              child: CameraPreview(_cameraController!),
+                            ),
                           ),
                           const Positioned(
-                            top: 20,
+                            bottom: 60,
                             child: Text(
-                              '이 수화 단어를 맞춰보세요',
+                              'Hello',
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -125,31 +132,54 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
                     ),
                   ),
           ),
-
           Padding(
-            padding: const EdgeInsets.only(bottom: 24.0),
-            child: ElevatedButton(
-              onPressed: _hasCamera
-                  ? () {
-                      print("Continue pressed");
-                    }
-                  : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF7A5C),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-              ),
-              child: const Text(
-                'Submit',
-                style: TextStyle(
-                  fontFamily: 'Comfortaa',
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+              padding: const EdgeInsets.only(bottom: 40.0),
+              child: Row(children: [
+                SizedBox(width: screenSize.width * 0.1),
+                ElevatedButton(
+                  onPressed: _hasCamera
+                      ? () {
+                          print("녹화 시작");
+                        }
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0x80DC89D1),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 40, vertical: 16),
+                  ),
+                  child: const Text(
+                    'Record',
+                    style: TextStyle(
+                      fontFamily: 'Comfortaa',
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ),
+                SizedBox(width: screenSize.width * 0.1),
+                ElevatedButton(
+                  onPressed: _hasCamera
+                      ? () {
+                          print("녹화 끝");
+                        }
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0x80DC89D1),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 40, vertical: 16),
+                  ),
+                  child: const Text(
+                    'Submit',
+                    style: TextStyle(
+                      fontFamily: 'Comfortaa',
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                )
+              ])),
         ],
       ),
     );
