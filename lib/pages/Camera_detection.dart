@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:hand_app/widgets/Logobar.dart';
+import '../pages/predictor.dart';
 
 class CameraDetectionPage extends StatefulWidget {
   const CameraDetectionPage({super.key});
@@ -13,11 +14,14 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
   CameraController? _cameraController;
   bool _isCameraInitialized = false;
   bool _hasCamera = true;
+  late Predictor predictor;
 
   @override
   void initState() {
     super.initState();
     _initCamera();
+    predictor = Predictor();
+    predictor.loadModel();
   }
 
   Future<void> _initCamera() async {
@@ -53,6 +57,16 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
         _hasCamera = false;
         _isCameraInitialized = false;
       });
+    }
+  }
+
+  Future<void> runPrediction(List<List<double>> inputData, int questionIndex) async {
+    int predictedIndex = await predictor.predict(inputData);
+
+    if (predictedIndex == questionIndex) {
+      print("✅ 정답입니다!");
+    } else {
+      print("❌ 오답입니다. 정답: $questionIndex, 예측: $predictedIndex");
     }
   }
 
