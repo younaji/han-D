@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:hand_app/pages/answer.dart';
 import 'package:hand_app/widgets/Logobar.dart';
-import '../pages/predictor.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 final List<Map<String, dynamic>> quizData = [
   {'text': '선반', 'index': 0},
@@ -28,7 +29,7 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
   CameraController? _cameraController;
   bool _isCameraInitialized = false;
   bool _hasCamera = true;
-  late Predictor predictor;
+  XFile? _videoFile;
 
   String get questionNum => quizData[widget.questionText]['text'];
   int get questionIndex => quizData[widget.questionText]['index'];
@@ -37,9 +38,7 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
   void initState() {
     super.initState();
     _initCamera();
-    predictor = Predictor();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await predictor.loadModel();
     });
   }
 
@@ -79,15 +78,36 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
     }
   }
 
-  Future<void> runPrediction(
-      List<List<double>> inputData, int questionIndex) async {
-    int predictedIndex = await predictor.predict(inputData);
-
-    if (predictedIndex == questionIndex) {
-      print("✅ 정답입니다!");
-    } else {
-      print("❌ 오답입니다. 정답: $questionIndex, 예측: $predictedIndex");
+  Future<void> startRecording() async {
+    if (_cameraController != null && _cameraController!.value.isInitialized) {
+      await _cameraController!.startVideoRecording();
+      print("녹화 시작");
     }
+  }
+
+  Future<void> stopRecording() async {
+    if (_cameraController != null && _cameraController!.value.isRecordingVideo) {
+      final file = await _cameraController!.stopVideoRecording();
+      print("녹화 완료: ${file.path}");
+      setState(() {
+        _videoFile = file;
+      });
+    }
+  }
+
+  Future<void> sendVideoToServer() async {
+    if (_videoFile == null) return;
+
+    final uri = Uri.parse("http://127.0.0.1:8000/predict_video/");
+    final request = http.MultipartRequest('POST', uri)
+      ..files.add(await http.MultipartFile.fromPath('file', _videoFile!.path));
+
+    final response = await request.send();
+    final result = await response.stream.bytesToString();
+    final data = jsonDecode(result);
+    print("서버 예측 결과: ${data['prediction']}");
+
+    // 정답 또는 오답 페이지
   }
 
   @override
@@ -172,9 +192,7 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
                 SizedBox(width: screenSize.width * 0.1),
                 ElevatedButton(
                   onPressed: _hasCamera
-                      ? () {
-                          print("녹화 시작");
-                        }
+                      ? startRecording
                       : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0x80DC89D1),
@@ -195,27 +213,11 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
                 ElevatedButton(
                   onPressed: _hasCamera
                       ? () async {
-                          print("녹화 끝");
-                          await Future.delayed(const Duration(seconds: 2));
-                          if (widget.questionText < quizData.length - 1) {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => CameraDetectionPage(
-                                    questionText: widget.questionText + 1),
-                              ),
-                            );
-                          } else {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const AnswerVideo(
-                                  videoFileName: '1.mp4',
-                                ),
-                              ),
-                            );
-                          }
-                        }
+
+                    await stopRecording();
+                    await sendVideoToServer();
+                  }
+
                       : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0x80DC89D1),
