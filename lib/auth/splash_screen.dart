@@ -19,7 +19,7 @@ class _SplashScreenState extends State<SplashScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-              builder: (context) => CorrectAnswerVideo(
+              builder: (context) => AnswerVideo(
                     videoFileName: '1.mp4',
                   )),
         );
