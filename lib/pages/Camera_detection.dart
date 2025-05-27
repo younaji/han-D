@@ -1,10 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:hand_app/pages/answer.dart';
 import 'package:hand_app/widgets/Logobar.dart';
 import '../pages/predictor.dart';
 
+final List<Map<String, dynamic>> quizData = [
+  {'text': '선반', 'index': 0},
+  {'text': '기절하다', 'index': 1},
+  {'text': '남편', 'index': 2},
+  {'text': '빨리 도와주세요', 'index': 3},
+  {'text': '협박', 'index': 4}
+];
+
 class CameraDetectionPage extends StatefulWidget {
-  const CameraDetectionPage({super.key});
+  final int questionText;
+
+  const CameraDetectionPage({
+    super.key,
+    required this.questionText,
+  });
 
   @override
   State<CameraDetectionPage> createState() => _CameraDetectionPageState();
@@ -15,6 +29,9 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
   bool _isCameraInitialized = false;
   bool _hasCamera = true;
   late Predictor predictor;
+
+  String get questionNum => quizData[widget.questionText]['text'];
+  int get questionIndex => quizData[widget.questionText]['index'];
 
   @override
   void initState() {
@@ -123,11 +140,11 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
                               child: CameraPreview(_cameraController!),
                             ),
                           ),
-                          const Positioned(
+                          Positioned(
                             bottom: 60,
                             child: Text(
-                              'Hello',
-                              style: TextStyle(
+                              questionNum,
+                              style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
@@ -177,8 +194,27 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
                 SizedBox(width: screenSize.width * 0.1),
                 ElevatedButton(
                   onPressed: _hasCamera
-                      ? () {
+                      ? () async {
                           print("녹화 끝");
+                          await Future.delayed(const Duration(seconds: 2));
+                          if (widget.questionText < quizData.length - 1) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => CameraDetectionPage(
+                                    questionText: widget.questionText + 1),
+                              ),
+                            );
+                          } else {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const AnswerVideo(
+                                  videoFileName: '1.mp4',
+                                ),
+                              ),
+                            );
+                          }
                         }
                       : null,
                   style: ElevatedButton.styleFrom(
