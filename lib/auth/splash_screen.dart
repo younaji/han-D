@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:hand_app/pages/Camera_detection.dart';
+import 'package:hand_app/pages/answer.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -17,7 +18,10 @@ class _SplashScreenState extends State<SplashScreen> {
       Timer(const Duration(seconds: 2), () {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => CameraDetectionPage()),
+          MaterialPageRoute(
+              builder: (context) => CorrectAnswerVideo(
+                    videoFileName: '1.mp4',
+                  )),
         );
       });
     });
@@ -30,7 +34,7 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: const Color(0xFFFAF1F1),
       body: Center(
         child: Image.asset(
-          'lib/assets/images/loading_logo.png',
+          'assets/images/loading_logo.png',
           width: screenSize.width * 0.56,
         ),
       ),

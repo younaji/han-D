@@ -21,7 +21,9 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
     super.initState();
     _initCamera();
     predictor = Predictor();
-    predictor.loadModel();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await predictor.loadModel();
+    });
   }
 
   Future<void> _initCamera() async {
@@ -60,7 +62,8 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
     }
   }
 
-  Future<void> runPrediction(List<List<double>> inputData, int questionIndex) async {
+  Future<void> runPrediction(
+      List<List<double>> inputData, int questionIndex) async {
     int predictedIndex = await predictor.predict(inputData);
 
     if (predictedIndex == questionIndex) {

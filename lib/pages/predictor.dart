@@ -7,9 +7,14 @@ class Predictor {
 
   /// 모델 로드 (앱 시작 시 한 번만 호출)
   Future<void> loadModel() async {
-    _interpreter = await Interpreter.fromAsset('lib/assets/model/kpnet.tflite');
-    _isLoaded = true;
-    print("모델 로딩 완료");
+    try {
+      _interpreter =
+          await Interpreter.fromAsset('lib/assets/model/kpnet.tflite');
+      _isLoaded = true;
+      print("모델 로딩 완료");
+    } catch (e) {
+      print("모델 로딩 실패: $e");
+    }
   }
 
   /// 입력: [60][138] float 리스트 → 예측된 클래스 인덱스 반환
@@ -19,7 +24,8 @@ class Predictor {
     }
 
     final inputTensor = [input]; // shape: [1, 60, 138]
-    final outputTensor = List.generate(1, (_) => List.filled(5, 0.0)); // shape: [1, 5]
+    final outputTensor =
+        List.generate(1, (_) => List.filled(5, 0.0)); // shape: [1, 5]
 
     _interpreter.run(inputTensor, outputTensor);
 
