@@ -4,8 +4,12 @@ import 'Camera_detection.dart'; // 다음 문제로 이동
 
 class CorrectAnswerPage extends StatelessWidget {
   final int nextQuestionIndex;
-
-  const CorrectAnswerPage({super.key, required this.nextQuestionIndex});
+  final int correctCount;
+  const CorrectAnswerPage({
+    Key? key,
+    required this.nextQuestionIndex,
+    required this.correctCount,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +39,7 @@ class CorrectAnswerPage extends StatelessWidget {
                 ),
               ),
             ),
+            SizedBox(height: screenSize.height * 0.03),
             const Text(
               'Correct Answer!',
               style: TextStyle(fontSize: 30, color: Colors.green),
@@ -44,6 +49,7 @@ class CorrectAnswerPage extends StatelessWidget {
               'assets/images/correct.png',
               width: screenSize.width * 0.78,
             ),
+            SizedBox(height: screenSize.height * 0.05),
             ElevatedButton(
               onPressed: () {
                 Navigator.pushReplacement(
@@ -51,6 +57,7 @@ class CorrectAnswerPage extends StatelessWidget {
                   MaterialPageRoute(
                     builder: (_) => CameraDetectionPage(
                       questionText: nextQuestionIndex,
+                      correctCount: correctCount,
                     ),
                   ),
                 );

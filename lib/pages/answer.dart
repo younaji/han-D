@@ -7,14 +7,15 @@ class AnswerVideo extends StatefulWidget {
   final String videoFileName;
   final int nextQuestionIndex;
   final int questionText;
+  final int correctCount;
 
   const AnswerVideo({
     Key? key,
     required this.videoFileName,
     required this.nextQuestionIndex,
     required this.questionText,
+    required this.correctCount,
   }) : super(key: key);
-
   @override
   _AnswerVideoState createState() => _AnswerVideoState();
 }
@@ -118,6 +119,7 @@ class _AnswerVideoState extends State<AnswerVideo> {
                   MaterialPageRoute(
                     builder: (_) => CameraDetectionPage(
                       questionText: widget.nextQuestionIndex,
+                      correctCount: widget.correctCount,
                     ),
                   ),
                 );

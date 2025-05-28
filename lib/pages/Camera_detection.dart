@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:hand_app/pages/answer.dart';
+import 'package:hand_app/pages/results.dart';
 import 'package:hand_app/widgets/Logobar.dart';
 import 'package:hand_app/pages/correct_answer.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 final List<Map<String, dynamic>> quizData = [
-  {'text': '화요일', 'index': 521},
   {'text': '친구', 'index': 470},
-  {'text': '작년', 'index': 432},
-  {'text': '왼쪽', 'index': 393},
-  {'text': '오른쪽', 'index': 387},
+  {'text': '화요일', 'index': 521},
   {'text': '오늘', 'index': 386},
-  {'text': '병원', 'index': 257},
   {'text': '바다', 'index': 237},
   {'text': '내일', 'index': 181},
   {'text': '개', 'index': 128}
@@ -21,10 +18,12 @@ final List<Map<String, dynamic>> quizData = [
 
 class CameraDetectionPage extends StatefulWidget {
   final int questionText;
+  final int correctCount;
 
   const CameraDetectionPage({
     super.key,
     required this.questionText,
+    this.correctCount = 0,
   });
 
   @override
@@ -117,27 +116,49 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
 
     // 정답 또는 오답 페이지
     int nextIndex = (widget.questionText + 1) % quizData.length;
-    if (nextIndex >= quizData.length) nextIndex = 0;
+    int updatedCount = widget.correctCount;
+
     if (predictedClassName == "class_${questionIndex}") {
-      // 정답인 경우
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => CorrectAnswerPage(nextQuestionIndex: nextIndex),
-        ),
-      );
-    } else {
-      // 오답인 경우
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => AnswerVideo(
-            videoFileName: "$questionIndex.mp4",
-            nextQuestionIndex: nextIndex,
-            questionText: widget.questionText,
+      updatedCount += 1; // 정답이면 맞은 개수 +1
+      if (nextIndex == 0) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ResultPage(score: updatedCount),
           ),
-        ),
-      );
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CorrectAnswerPage(
+              nextQuestionIndex: nextIndex,
+              correctCount: updatedCount,
+            ),
+          ),
+        );
+      }
+    } else {
+      if (nextIndex == 0) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ResultPage(score: updatedCount),
+          ),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => AnswerVideo(
+              videoFileName: "$questionIndex.mp4",
+              nextQuestionIndex: nextIndex,
+              questionText: widget.questionText,
+              correctCount: updatedCount, // 틀렸으므로 그대로 전달
+            ),
+          ),
+        );
+      }
     }
   }
 
