@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:hand_app/widgets/Logobar.dart';
 import 'package:video_player/video_player.dart';
+import 'Camera_detection.dart';
 
 class AnswerVideo extends StatefulWidget {
   final String videoFileName;
+  final int nextQuestionIndex;
 
-  const AnswerVideo({Key? key, required this.videoFileName}) : super(key: key);
+  const AnswerVideo({
+    Key? key,
+    required this.videoFileName,
+    required this.nextQuestionIndex,
+  }) : super(key: key);
 
   @override
   _AnswerVideoState createState() => _AnswerVideoState();
@@ -73,6 +79,21 @@ class _AnswerVideoState extends State<AnswerVideo> {
                 ),
               ],
             ),
+            const SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CameraDetectionPage(
+                      questionText: widget.nextQuestionIndex,
+                    ),
+                  ),
+                );
+              },
+              child: const Text("다음 문제"),
+            ),
+            const SizedBox(height: 30),
           ],
         ),
       ),

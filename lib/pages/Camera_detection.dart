@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:hand_app/pages/answer.dart';
 import 'package:hand_app/widgets/Logobar.dart';
+import 'package:hand_app/pages/correct_answer.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -38,8 +39,7 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
   void initState() {
     super.initState();
     _initCamera();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) async {});
   }
 
   Future<void> _initCamera() async {
@@ -86,7 +86,8 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
   }
 
   Future<void> stopRecording() async {
-    if (_cameraController != null && _cameraController!.value.isRecordingVideo) {
+    if (_cameraController != null &&
+        _cameraController!.value.isRecordingVideo) {
       final file = await _cameraController!.stopVideoRecording();
       print("녹화 완료: ${file.path}");
       setState(() {
@@ -98,16 +99,39 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
   Future<void> sendVideoToServer() async {
     if (_videoFile == null) return;
 
-    final uri = Uri.parse("http://127.0.0.1:8000/predict_video/");
+    final uri = Uri.parse("http://192.168.0.10:8000/predict_video/");
     final request = http.MultipartRequest('POST', uri)
       ..files.add(await http.MultipartFile.fromPath('file', _videoFile!.path));
 
     final response = await request.send();
     final result = await response.stream.bytesToString();
-    final data = jsonDecode(result);
-    print("서버 예측 결과: ${data['prediction']}");
+    final data = jsonDecode(result); // JSON 객체로 파싱
+    final predictedClassName = data['prediction']; // "class_2"
+    print("서버 예측 결과: $predictedClassName");
 
     // 정답 또는 오답 페이지
+    int nextIndex = widget.questionText + 1;
+    if (nextIndex >= quizData.length) nextIndex = 0;
+    if (predictedClassName == "class_${questionIndex}") {
+      // 정답인 경우
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CorrectAnswerPage(nextQuestionIndex: nextIndex),
+        ),
+      );
+    } else {
+      // 오답인 경우
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => AnswerVideo(
+            videoFileName: "$questionIndex.mp4",
+            nextQuestionIndex: nextIndex,
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -191,9 +215,7 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
               child: Row(children: [
                 SizedBox(width: screenSize.width * 0.1),
                 ElevatedButton(
-                  onPressed: _hasCamera
-                      ? startRecording
-                      : null,
+                  onPressed: _hasCamera ? startRecording : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0x80DC89D1),
                     padding: const EdgeInsets.symmetric(
@@ -213,11 +235,9 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
                 ElevatedButton(
                   onPressed: _hasCamera
                       ? () async {
-
-                    await stopRecording();
-                    await sendVideoToServer();
-                  }
-
+                          await stopRecording();
+                          await sendVideoToServer();
+                        }
                       : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0x80DC89D1),

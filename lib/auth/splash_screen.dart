@@ -16,12 +16,10 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Timer(const Duration(seconds: 2), () {
-        Navigator.pushReplacement(
-          context,
+        Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-              builder: (context) => AnswerVideo(
-                    videoFileName: '1.mp4',
-                  )),
+            builder: (context) => CameraDetectionPage(questionText: 0),
+          ),
         );
       });
     });
