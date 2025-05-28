@@ -9,17 +9,41 @@ class CorrectAnswerPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
     return Scaffold(
       appBar: Logobar(),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Container(
+              width: screenSize.width * 0.4,
+              height: screenSize.height * 0.05,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: const Color(0x80DC89D1),
+              ),
+              child: const Center(
+                child: Text(
+                  "DAY 1",
+                  style: TextStyle(
+                    fontFamily: 'Comfortaa',
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
             const Text(
-              '정답입니다!',
-              style: TextStyle(fontSize: 24, color: Colors.green),
+              'Correct Answer!',
+              style: TextStyle(fontSize: 30, color: Colors.green),
             ),
             const SizedBox(height: 30),
+            Image.asset(
+              'assets/images/correct.png',
+              width: screenSize.width * 0.78,
+            ),
             ElevatedButton(
               onPressed: () {
                 Navigator.pushReplacement(
@@ -31,8 +55,21 @@ class CorrectAnswerPage extends StatelessWidget {
                   ),
                 );
               },
-              child: const Text("다음 문제"),
-            )
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0x80DC89D1),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 80, vertical: 16),
+              ),
+              child: const Text(
+                "Next Question",
+                style: TextStyle(
+                  fontFamily: 'Comfortaa',
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
           ],
         ),
       ),

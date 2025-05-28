@@ -6,11 +6,13 @@ import 'Camera_detection.dart';
 class AnswerVideo extends StatefulWidget {
   final String videoFileName;
   final int nextQuestionIndex;
+  final int questionText;
 
   const AnswerVideo({
     Key? key,
     required this.videoFileName,
     required this.nextQuestionIndex,
+    required this.questionText,
   }) : super(key: key);
 
   @override
@@ -20,6 +22,7 @@ class AnswerVideo extends StatefulWidget {
 class _AnswerVideoState extends State<AnswerVideo> {
   late VideoPlayerController _controller;
 
+  String get questionNum => quizData[widget.questionText]['text'];
   @override
   void initState() {
     super.initState();
@@ -51,18 +54,37 @@ class _AnswerVideoState extends State<AnswerVideo> {
       body: Center(
         child: Column(
           children: [
-            SizedBox(height: screenSize.height * 0.1),
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  width: screenSize.width * 0.89,
-                  height: screenSize.height * 0.6,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: const Color(0x80DC89D1),
+            Container(
+              width: screenSize.width * 0.4,
+              height: screenSize.height * 0.05,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: const Color(0x80DC89D1),
+              ),
+              child: const Center(
+                child: Text(
+                  "DAY 1",
+                  style: TextStyle(
+                    fontFamily: 'Comfortaa',
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
+              ),
+            ),
+            SizedBox(height: screenSize.height * 0.03),
+            Text(
+              'Follow this one more time!',
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            SizedBox(height: screenSize.height * 0.01),
+            Column(
+              children: [
                 Container(
                   width: screenSize.width * 0.8,
                   height: screenSize.height * 0.44,
@@ -76,6 +98,15 @@ class _AnswerVideoState extends State<AnswerVideo> {
                           child: VideoPlayer(_controller),
                         )
                       : const CircularProgressIndicator(),
+                ),
+                SizedBox(height: screenSize.height * 0.03),
+                Text(
+                  questionNum,
+                  style: const TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
               ],
             ),
@@ -91,7 +122,20 @@ class _AnswerVideoState extends State<AnswerVideo> {
                   ),
                 );
               },
-              child: const Text("다음 문제"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0x80DC89D1),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 80, vertical: 16),
+              ),
+              child: const Text(
+                "Next Question",
+                style: TextStyle(
+                  fontFamily: 'Comfortaa',
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
             ),
             const SizedBox(height: 30),
           ],

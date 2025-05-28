@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:hand_app/pages/Camera_detection.dart';
 import 'package:hand_app/pages/answer.dart';
+import 'package:hand_app/pages/list.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -18,7 +19,7 @@ class _SplashScreenState extends State<SplashScreen> {
       Timer(const Duration(seconds: 2), () {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => CameraDetectionPage(questionText: 0),
+            builder: (context) => ListPage(),
           ),
         );
       });
