@@ -39,6 +39,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   tflite_flutter: ^0.11.0
   video_player: ^2.9.5
+  http: ^0.13.6
 
 dev_dependencies:
   flutter_test:
@@ -66,7 +67,6 @@ flutter:
   assets:
     - assets/images/
     - assets/videos/
-    - assets/model/kpnet.tflite
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
