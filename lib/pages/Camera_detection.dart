@@ -104,17 +104,16 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
   Future<void> sendVideoToServer() async {
     if (_videoFile == null) return;
 
-    final uri = Uri.parse("http://192.168.0.10:8000/predict_video/");
+    final uri = Uri.parse("http://172.17.7.65:8000/predict_video/");
     final request = http.MultipartRequest('POST', uri)
       ..files.add(await http.MultipartFile.fromPath('file', _videoFile!.path));
 
     final response = await request.send();
     final result = await response.stream.bytesToString();
-    final data = jsonDecode(result); // JSON 객체로 파싱
-    final predictedClassName = data['prediction']; // "class_2"
+    final data = jsonDecode(result);
+    final predictedClassName = data['prediction'];
     print("서버 예측 결과: $predictedClassName");
 
-    // 정답 또는 오답 페이지
     int nextIndex = (widget.questionText + 1) % quizData.length;
     int updatedCount = widget.correctCount;
 
@@ -261,12 +260,12 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
           Padding(
             padding: const EdgeInsets.only(bottom: 40.0),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end, // ⭐️ 버튼 하단 맞춤
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 SizedBox(width: screenSize.width * 0.1),
                 Column(
                   mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.end, // ⭐️ 아래 정렬
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     SizedBox(
                       height: 20,
@@ -319,7 +318,7 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
                 ),
                 SizedBox(width: screenSize.width * 0.1),
                 Column(
-                  mainAxisAlignment: MainAxisAlignment.end, // ⭐️ 아래 정렬
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     SizedBox(
                       width: 130,

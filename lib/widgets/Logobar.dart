@@ -6,8 +6,7 @@ class Logobar extends StatelessWidget implements PreferredSizeWidget {
   });
 
   @override
-  Size get preferredSize =>
-      const Size.fromHeight(kToolbarHeight); // 기본 AppBar 높이
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   @override
   Widget build(BuildContext context) {

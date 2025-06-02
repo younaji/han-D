@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:hand_app/pages/Camera_detection.dart';
-import 'package:hand_app/pages/answer.dart';
 import 'package:hand_app/pages/list.dart';
 
 class SplashScreen extends StatefulWidget {
