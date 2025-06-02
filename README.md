@@ -67,7 +67,7 @@ flutter run
 ## 🚀 Back-End
 It is useful to store and run 'han-D-server' separately.
 
-## API Usage
+### API Usage
 
 - **Request**:
   `file`: `.mp4` styled video
@@ -79,14 +79,14 @@ It is useful to store and run 'han-D-server' separately.
 }
 ```
 
-## How to Run
+### How to Run
 
-**1. Install**
+- **Install**
 ```
 pip install -r requirements.txt
 ```
 
-**2. Server run**
+- **Server run**
 ```
 uvicorn app.main:app --reload
 ```
@@ -106,7 +106,7 @@ uvicorn app.main:app --reload
 
 - **Output**: `logits.shape = (1, n_classes)` → softmax probability distribution
 
-  ## 🧑‍💻 Contributors
+## 🧑‍💻 Contributors
 | Name  | Role               |
 | --- | ----------------- |
 | 최정은 | Deep Learning Model Development |
