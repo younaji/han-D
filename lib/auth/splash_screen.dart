@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:hand_app/pages/Camera_detection.dart';
-import 'package:hand_app/pages/answer.dart';
+import 'package:hand_app/pages/list.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -16,12 +15,10 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Timer(const Duration(seconds: 2), () {
-        Navigator.pushReplacement(
-          context,
+        Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-              builder: (context) => CorrectAnswerVideo(
-                    videoFileName: '1.mp4',
-                  )),
+            builder: (context) => ListPage(),
+          ),
         );
       });
     });

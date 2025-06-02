@@ -1,10 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:hand_app/pages/answer.dart';
+import 'package:hand_app/pages/results.dart';
 import 'package:hand_app/widgets/Logobar.dart';
-import '../pages/predictor.dart';
+import 'package:hand_app/pages/correct_answer.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+final List<Map<String, dynamic>> quizData = [
+  {'text': '친구', 'index': 470},
+  {'text': '화요일', 'index': 521},
+  {'text': '오늘', 'index': 386},
+  {'text': '바다', 'index': 237},
+  {'text': '내일', 'index': 181},
+  {'text': '개', 'index': 128}
+];
 
 class CameraDetectionPage extends StatefulWidget {
-  const CameraDetectionPage({super.key});
+  final int questionText;
+  final int correctCount;
+
+  const CameraDetectionPage({
+    super.key,
+    required this.questionText,
+    this.correctCount = 0,
+  });
 
   @override
   State<CameraDetectionPage> createState() => _CameraDetectionPageState();
@@ -14,16 +34,17 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
   CameraController? _cameraController;
   bool _isCameraInitialized = false;
   bool _hasCamera = true;
-  late Predictor predictor;
+  XFile? _videoFile;
+  bool _isRecordingStarted = false;
+
+  String get questionNum => quizData[widget.questionText]['text'];
+  int get questionIndex => quizData[widget.questionText]['index'];
 
   @override
   void initState() {
     super.initState();
     _initCamera();
-    predictor = Predictor();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await predictor.loadModel();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) async {});
   }
 
   Future<void> _initCamera() async {
@@ -62,14 +83,81 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
     }
   }
 
-  Future<void> runPrediction(
-      List<List<double>> inputData, int questionIndex) async {
-    int predictedIndex = await predictor.predict(inputData);
+  Future<void> startRecording() async {
+    if (_cameraController != null && _cameraController!.value.isInitialized) {
+      await _cameraController!.startVideoRecording();
+      print("녹화 시작");
+    }
+  }
 
-    if (predictedIndex == questionIndex) {
-      print("✅ 정답입니다!");
+  Future<void> stopRecording() async {
+    if (_cameraController != null &&
+        _cameraController!.value.isRecordingVideo) {
+      final file = await _cameraController!.stopVideoRecording();
+      print("녹화 완료: ${file.path}");
+      setState(() {
+        _videoFile = file;
+      });
+    }
+  }
+
+  Future<void> sendVideoToServer() async {
+    if (_videoFile == null) return;
+
+    final uri = Uri.parse("http://172.17.7.65:8000/predict_video/");
+    final request = http.MultipartRequest('POST', uri)
+      ..files.add(await http.MultipartFile.fromPath('file', _videoFile!.path));
+
+    final response = await request.send();
+    final result = await response.stream.bytesToString();
+    final data = jsonDecode(result);
+    final predictedClassName = data['prediction'];
+    print("서버 예측 결과: $predictedClassName");
+
+    int nextIndex = (widget.questionText + 1) % quizData.length;
+    int updatedCount = widget.correctCount;
+
+    if (predictedClassName == "class_${questionIndex}") {
+      updatedCount += 1; // 정답이면 맞은 개수 +1
+      if (nextIndex == 0) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ResultPage(score: updatedCount),
+          ),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CorrectAnswerPage(
+              nextQuestionIndex: nextIndex,
+              correctCount: updatedCount,
+            ),
+          ),
+        );
+      }
     } else {
-      print("❌ 오답입니다. 정답: $questionIndex, 예측: $predictedIndex");
+      if (nextIndex == 0) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ResultPage(score: updatedCount),
+          ),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => AnswerVideo(
+              videoFileName: "$questionIndex.mp4",
+              nextQuestionIndex: nextIndex,
+              questionText: widget.questionText,
+              correctCount: updatedCount, // 틀렸으므로 그대로 전달
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -87,15 +175,46 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
       appBar: Logobar(),
       body: Column(
         children: [
-          const Text(
-            'DAY 1',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Comfortaa',
-              fontSize: 30,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF302E2E),
+          Container(
+            width: screenSize.width * 0.4,
+            height: screenSize.height * 0.05,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: const Color(0x80DC89D1),
             ),
+            child: const Center(
+              child: Text(
+                "DAY 1",
+                style: TextStyle(
+                  fontFamily: 'Comfortaa',
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: screenSize.height * 0.03),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                questionNum,
+                style: const TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                ),
+              ),
+              Text(
+                '  을/를 수어로 표현하세요',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0x80DC89D1),
+                ),
+              ),
+            ],
           ),
           Expanded(
             child: _hasCamera
@@ -105,7 +224,7 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
                         children: [
                           Container(
                             width: screenSize.width * 0.89,
-                            height: screenSize.height * 0.6,
+                            height: screenSize.height * 0.5,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20),
                               color: const Color(0x80DC89D1),
@@ -121,17 +240,6 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
                             child: AspectRatio(
                               aspectRatio: _cameraController!.value.aspectRatio,
                               child: CameraPreview(_cameraController!),
-                            ),
-                          ),
-                          const Positioned(
-                            bottom: 60,
-                            child: Text(
-                              'Hello',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
                             ),
                           ),
                         ],
@@ -150,53 +258,99 @@ class _CameraDetectionPageState extends State<CameraDetectionPage> {
                   ),
           ),
           Padding(
-              padding: const EdgeInsets.only(bottom: 40.0),
-              child: Row(children: [
+            padding: const EdgeInsets.only(bottom: 40.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
                 SizedBox(width: screenSize.width * 0.1),
-                ElevatedButton(
-                  onPressed: _hasCamera
-                      ? () {
-                          print("녹화 시작");
-                        }
-                      : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0x80DC89D1),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 40, vertical: 16),
-                  ),
-                  child: const Text(
-                    'Record',
-                    style: TextStyle(
-                      fontFamily: 'Comfortaa',
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    SizedBox(
+                      height: 20,
+                      child: _isRecordingStarted
+                          ? const Text(
+                              'Recording...',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.red,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            )
+                          : const SizedBox.shrink(),
                     ),
-                  ),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: 130,
+                      height: 56,
+                      child: ElevatedButton.icon(
+                        onPressed: (_hasCamera && !_isRecordingStarted)
+                            ? () async {
+                                setState(() {
+                                  _isRecordingStarted = true;
+                                });
+                                await startRecording();
+                              }
+                            : null,
+                        icon: Icon(
+                          _isRecordingStarted
+                              ? Icons.videocam
+                              : Icons.fiber_manual_record,
+                          color: Colors.white,
+                        ),
+                        label: const Text(
+                          'Record',
+                          style: TextStyle(
+                            fontFamily: 'Comfortaa',
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFE53935),
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 SizedBox(width: screenSize.width * 0.1),
-                ElevatedButton(
-                  onPressed: _hasCamera
-                      ? () {
-                          print("녹화 끝");
-                        }
-                      : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0x80DC89D1),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 40, vertical: 16),
-                  ),
-                  child: const Text(
-                    'Submit',
-                    style: TextStyle(
-                      fontFamily: 'Comfortaa',
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    SizedBox(
+                      width: 130,
+                      height: 56,
+                      child: ElevatedButton.icon(
+                        onPressed: _hasCamera
+                            ? () async {
+                                await stopRecording();
+                                await sendVideoToServer();
+                              }
+                            : null,
+                        icon: const Icon(Icons.send, color: Colors.white),
+                        label: const Text(
+                          'Submit',
+                          style: TextStyle(
+                            fontFamily: 'Comfortaa',
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0x80DC89D1),
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                        ),
+                      ),
                     ),
-                  ),
-                )
-              ])),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
