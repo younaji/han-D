@@ -65,7 +65,7 @@ flutter run
 </div>
 
 ## 🚀 Back-End
-It is useful to store and run 'han-D-server' seperately.
+It is useful to store and run 'han-D-server' separately.
 
 ## API Usage
 
